@@ -1,4 +1,8 @@
 
+// SMART TRAFFIC LIGHT SYSTEM
+// Enivronment Prototype
+
+// Include Libraries
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <cmath>
@@ -12,16 +16,51 @@ const float CIRCLE_RADIUS = 5.0f;
 const float SPEED = 100.0f; // pixels per second
 const sf::Vector2f CIRCLE_OFFSET(CIRCLE_RADIUS, CIRCLE_RADIUS);
 
-// Node properties
-const float NODE_WIDTH = 20.0f;
-const sf::Vector2f NODE_OFFSET(NODE_WIDTH/2, NODE_WIDTH/2);
-
 // Start node properties
 const float SPAWN_INTERVAL = 0.5f; // seconds
 
-
-struct Node {
+// Default node
+class Node {
+protected:
+    const float NODE_WIDTH = 20.0f;
+    const sf::Vector2f NODE_OFFSET = sf::Vector2f(NODE_WIDTH/2, NODE_WIDTH/2);
+    sf::RectangleShape shape;
     sf::Vector2f position;
+public:
+    Node(float x, float y) : position(x, y) {
+        shape = sf::RectangleShape(sf::Vector2f(NODE_WIDTH, NODE_WIDTH));
+        shape.setFillColor(sf::Color::Blue);
+        shape.setPosition(position - NODE_OFFSET);
+    }
+
+    sf::Vector2f getPosition() const {
+        return position;
+    }
+
+    void setPosition(float x, float y) {
+        position = sf::Vector2f(x, y);
+        shape.setPosition(position - NODE_OFFSET);
+    }
+
+    sf::RectangleShape getShape() {
+        return shape;
+    }
+};
+
+// Start node
+class StartNode : public Node {
+public:
+    StartNode(float x, float y) : Node(x, y) {
+        shape.setFillColor(sf::Color::Green);
+    }
+};
+
+// End node
+class EndNode : public Node {
+public:
+    EndNode(float x, float y) : Node(x, y) {
+        shape.setFillColor(sf::Color::Red);
+    }
 };
 
 struct MovingCircle {
@@ -29,39 +68,34 @@ struct MovingCircle {
     float distanceTravelled;
 };
 
-struct StartNode {
-    sf::RectangleShape shape;
+class Bot {
+private:
+    sf::CircleShape shape;
     sf::Vector2f position;
+    float distanceTravelled;
+public:
+    Bot(float x, float y) : position(x, y) {
+        shape = sf::CircleShape(CIRCLE_RADIUS);
+        shape.setFillColor(sf::Color::White);
+        shape.setPosition(position - CIRCLE_OFFSET);
+        distanceTravelled = 0.0f;
+    }
 };
 
-struct EndNode {
-    sf::RectangleShape shape;
-    sf::Vector2f position;
-};
 
 int main() {
     // Create the SFML window
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Network Simulation");
 
     // Define start and end nodes
-    StartNode startNode = {
-        sf::RectangleShape(sf::Vector2f(NODE_WIDTH, NODE_WIDTH)),
-        sf::Vector2f(100.0f, WINDOW_HEIGHT/2)
-    };
-    startNode.shape.setFillColor(sf::Color::Green);
-    startNode.shape.setPosition(startNode.position - NODE_OFFSET);
+    StartNode startNode = StartNode(100.0f, WINDOW_HEIGHT/2);
+    EndNode endNode = EndNode(WINDOW_WIDTH - 100.0f, WINDOW_HEIGHT/2);
 
-    EndNode endNode = {
-        sf::RectangleShape(sf::Vector2f(NODE_WIDTH, NODE_WIDTH)),
-        sf::Vector2f(WINDOW_WIDTH - 100.0f, WINDOW_HEIGHT/2)
-    };
-    endNode.shape.setFillColor(sf::Color::Red);
-    endNode.shape.setPosition(endNode.position - NODE_OFFSET);
 
     // Line between nodes
     sf::Vertex line[] = {
-        sf::Vertex(startNode.position),
-        sf::Vertex(endNode.position)
+        sf::Vertex(startNode.getPosition()),
+        sf::Vertex(endNode.getPosition())
     };
 
     // Vector to store moving circles
@@ -87,13 +121,13 @@ int main() {
             MovingCircle newCircle;
             newCircle.shape = sf::CircleShape(CIRCLE_RADIUS);
             newCircle.shape.setFillColor(sf::Color::White);
-            newCircle.shape.setPosition(startNode.position - CIRCLE_OFFSET);
+            newCircle.shape.setPosition(startNode.getPosition() - CIRCLE_OFFSET);
             newCircle.distanceTravelled = 0.0f;
             circles.push_back(newCircle);
         }
 
         // Calculate the direction vector and length
-        sf::Vector2f direction = endNode.position - startNode.position;
+        sf::Vector2f direction = endNode.getPosition() - startNode.getPosition();
         float lineLength = std::sqrt(direction.x*direction.x + direction.y*direction.y);
         sf::Vector2f normalizedDirection = direction/lineLength;
 
@@ -105,7 +139,7 @@ int main() {
                 it = circles.erase(it);
             } else {
                 // Update position along the line
-                it->shape.setPosition(startNode.position + normalizedDirection*it->distanceTravelled - CIRCLE_OFFSET);
+                it->shape.setPosition(startNode.getPosition() + normalizedDirection*it->distanceTravelled - CIRCLE_OFFSET);
                 ++it;
             }
         }
@@ -115,8 +149,8 @@ int main() {
         window.draw(line, 2, sf::Lines);
         for (const auto& circle : circles) {
             window.draw(circle.shape);
-            window.draw(startNode.shape);
-            window.draw(endNode.shape);
+            window.draw(startNode.getShape());
+            window.draw(endNode.getShape());
         }
         window.display();
     }
