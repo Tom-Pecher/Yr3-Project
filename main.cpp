@@ -1,8 +1,6 @@
 
 // SMART TRAFFIC LIGHT SYSTEM
 // Enivronment Prototype
-
-// Include Libraries
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <cmath>
@@ -11,11 +9,6 @@
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
 
-// Bot properties
-const float CIRCLE_RADIUS = 5.0f;
-const float SPEED = 100.0f; // pixels per second
-const sf::Vector2f CIRCLE_OFFSET(CIRCLE_RADIUS, CIRCLE_RADIUS);
-
 // Start node properties
 const float SPAWN_INTERVAL = 0.5f; // seconds
 
@@ -23,14 +16,14 @@ const float SPAWN_INTERVAL = 0.5f; // seconds
 class Node {
 protected:
     const float NODE_WIDTH = 20.0f;
-    const sf::Vector2f NODE_OFFSET = sf::Vector2f(NODE_WIDTH/2, NODE_WIDTH/2);
+    const sf::Vector2f SQUARE_OFFSET = sf::Vector2f(NODE_WIDTH / 2, NODE_WIDTH / 2);
     sf::RectangleShape shape;
     sf::Vector2f position;
 public:
     Node(float x, float y) : position(x, y) {
         shape = sf::RectangleShape(sf::Vector2f(NODE_WIDTH, NODE_WIDTH));
         shape.setFillColor(sf::Color::Blue);
-        shape.setPosition(position - NODE_OFFSET);
+        shape.setPosition(position - SQUARE_OFFSET);
     }
 
     sf::Vector2f getPosition() const {
@@ -39,10 +32,10 @@ public:
 
     void setPosition(float x, float y) {
         position = sf::Vector2f(x, y);
-        shape.setPosition(position - NODE_OFFSET);
+        shape.setPosition(position - SQUARE_OFFSET);
     }
 
-    sf::RectangleShape getShape() {
+    sf::RectangleShape getShape() const {
         return shape;
     }
 };
@@ -63,34 +56,46 @@ public:
     }
 };
 
-struct MovingCircle {
-    sf::CircleShape shape;
-    float distanceTravelled;
-};
-
 class Bot {
 private:
     sf::CircleShape shape;
     sf::Vector2f position;
-    float distanceTravelled;
+    float CIRCLE_RADIUS = 5.0f;
+    sf::Vector2f CIRCLE_OFFSET = sf::Vector2f(CIRCLE_RADIUS, CIRCLE_RADIUS);
+    float SPEED = 100.0f;
 public:
     Bot(float x, float y) : position(x, y) {
         shape = sf::CircleShape(CIRCLE_RADIUS);
         shape.setFillColor(sf::Color::White);
         shape.setPosition(position - CIRCLE_OFFSET);
-        distanceTravelled = 0.0f;
+    }
+
+    sf::Vector2f getPosition() const {
+        return position;
+    }
+
+    void setPosition(float x, float y) {
+        position = sf::Vector2f(x, y);
+        shape.setPosition(position - CIRCLE_OFFSET);
+    }
+
+    sf::CircleShape getShape() const {
+        return shape;
+    }
+
+    void move(sf::Vector2f direction, float deltaTime) {
+        setPosition(getPosition().x + direction.x * SPEED * deltaTime,
+        getPosition().y + direction.y * SPEED * deltaTime);
     }
 };
-
 
 int main() {
     // Create the SFML window
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Network Simulation");
 
     // Define start and end nodes
-    StartNode startNode = StartNode(100.0f, WINDOW_HEIGHT/2);
-    EndNode endNode = EndNode(WINDOW_WIDTH - 100.0f, WINDOW_HEIGHT/2);
-
+    StartNode startNode = StartNode(100.0f, WINDOW_HEIGHT / 2);
+    EndNode endNode = EndNode(WINDOW_WIDTH - 100.0f, WINDOW_HEIGHT / 2);
 
     // Line between nodes
     sf::Vertex line[] = {
@@ -99,7 +104,7 @@ int main() {
     };
 
     // Vector to store moving circles
-    std::vector<MovingCircle> circles;
+    std::vector<Bot> bots;
     float spawnTimer = 0.0f;
 
     // Main loop
@@ -118,28 +123,22 @@ int main() {
         // Spawn a new circle if the interval has passed
         if (spawnTimer >= SPAWN_INTERVAL) {
             spawnTimer -= SPAWN_INTERVAL;
-            MovingCircle newCircle;
-            newCircle.shape = sf::CircleShape(CIRCLE_RADIUS);
-            newCircle.shape.setFillColor(sf::Color::White);
-            newCircle.shape.setPosition(startNode.getPosition() - CIRCLE_OFFSET);
-            newCircle.distanceTravelled = 0.0f;
-            circles.push_back(newCircle);
+            Bot newBot = Bot(startNode.getPosition().x, startNode.getPosition().y);
+            bots.push_back(newBot);
         }
 
         // Calculate the direction vector and length
         sf::Vector2f direction = endNode.getPosition() - startNode.getPosition();
-        float lineLength = std::sqrt(direction.x*direction.x + direction.y*direction.y);
-        sf::Vector2f normalizedDirection = direction/lineLength;
+        float lineLength = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+        sf::Vector2f normalizedDirection = direction / lineLength;
 
-        // Move each circle along the line
-        for (auto it = circles.begin(); it != circles.end();) {
-            it->distanceTravelled += SPEED*deltaTime;
-            if (it->distanceTravelled >= lineLength) {
-                // Remove circle when it reaches the end node
-                it = circles.erase(it);
+        // Move each bot along the line
+        for (auto it = bots.begin(); it != bots.end();) {
+            it->move(normalizedDirection, deltaTime);
+            // Remove the circle if it reaches the end node
+            if (it->getPosition().x > endNode.getPosition().x) {
+                it = bots.erase(it);
             } else {
-                // Update position along the line
-                it->shape.setPosition(startNode.getPosition() + normalizedDirection*it->distanceTravelled - CIRCLE_OFFSET);
                 ++it;
             }
         }
@@ -147,11 +146,11 @@ int main() {
         // Render everything
         window.clear();
         window.draw(line, 2, sf::Lines);
-        for (const auto& circle : circles) {
-            window.draw(circle.shape);
-            window.draw(startNode.getShape());
-            window.draw(endNode.getShape());
+        for (const auto& bot : bots) {
+            window.draw(bot.getShape());
         }
+        window.draw(startNode.getShape());
+        window.draw(endNode.getShape());
         window.display();
     }
 
