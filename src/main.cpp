@@ -12,6 +12,40 @@ const int WINDOW_HEIGHT = 600;
 // Start node properties
 const float SPAWN_INTERVAL = 0.5f; // seconds
 
+// Bot (moving vehicle)
+class Bot {
+private:
+    sf::CircleShape shape;
+    sf::Vector2f position;
+    float CIRCLE_RADIUS = 5.0f;
+    sf::Vector2f CIRCLE_OFFSET = sf::Vector2f(CIRCLE_RADIUS, CIRCLE_RADIUS);
+    float SPEED = 100.0f;
+public:
+    Bot(float x, float y) : position(x, y) {
+        shape = sf::CircleShape(CIRCLE_RADIUS);
+        shape.setFillColor(sf::Color::White);
+        shape.setPosition(position - CIRCLE_OFFSET);
+    }
+
+    sf::Vector2f getPosition() const {
+        return position;
+    }
+
+    void setPosition(float x, float y) {
+        position = sf::Vector2f(x, y);
+        shape.setPosition(position - CIRCLE_OFFSET);
+    }
+
+    sf::CircleShape getShape() const {
+        return shape;
+    }
+
+    void move(sf::Vector2f direction, float deltaTime) {
+        setPosition(getPosition().x + direction.x * SPEED * deltaTime,
+        getPosition().y + direction.y * SPEED * deltaTime);
+    }
+};
+
 // Default node
 class Node {
 protected:
@@ -46,6 +80,10 @@ public:
     StartNode(float x, float y) : Node(x, y) {
         shape.setFillColor(sf::Color::Green);
     }
+
+    Bot spawnBot() {
+        return Bot(position.x, position.y);
+    }
 };
 
 // End node
@@ -53,39 +91,6 @@ class EndNode : public Node {
 public:
     EndNode(float x, float y) : Node(x, y) {
         shape.setFillColor(sf::Color::Red);
-    }
-};
-
-class Bot {
-private:
-    sf::CircleShape shape;
-    sf::Vector2f position;
-    float CIRCLE_RADIUS = 5.0f;
-    sf::Vector2f CIRCLE_OFFSET = sf::Vector2f(CIRCLE_RADIUS, CIRCLE_RADIUS);
-    float SPEED = 100.0f;
-public:
-    Bot(float x, float y) : position(x, y) {
-        shape = sf::CircleShape(CIRCLE_RADIUS);
-        shape.setFillColor(sf::Color::White);
-        shape.setPosition(position - CIRCLE_OFFSET);
-    }
-
-    sf::Vector2f getPosition() const {
-        return position;
-    }
-
-    void setPosition(float x, float y) {
-        position = sf::Vector2f(x, y);
-        shape.setPosition(position - CIRCLE_OFFSET);
-    }
-
-    sf::CircleShape getShape() const {
-        return shape;
-    }
-
-    void move(sf::Vector2f direction, float deltaTime) {
-        setPosition(getPosition().x + direction.x * SPEED * deltaTime,
-        getPosition().y + direction.y * SPEED * deltaTime);
     }
 };
 
@@ -123,7 +128,7 @@ int main() {
         // Spawn a new circle if the interval has passed
         if (spawnTimer >= SPAWN_INTERVAL) {
             spawnTimer -= SPAWN_INTERVAL;
-            Bot newBot = Bot(startNode.getPosition().x, startNode.getPosition().y);
+            Bot newBot = startNode.spawnBot();
             bots.push_back(newBot);
         }
 
@@ -136,7 +141,7 @@ int main() {
         for (auto it = bots.begin(); it != bots.end();) {
             it->move(normalizedDirection, deltaTime);
             // Remove the circle if it reaches the end node
-            if (it->getPosition().x > endNode.getPosition().x) {
+            if (it->getShape().getGlobalBounds().intersects(endNode.getShape().getGlobalBounds())) {
                 it = bots.erase(it);
             } else {
                 ++it;
