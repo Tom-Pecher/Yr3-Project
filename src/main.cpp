@@ -1,100 +1,17 @@
+
 // SMART TRAFFIC LIGHT SYSTEM
 // Environment Prototype
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <cmath>
 #include <memory>
+#include "Bot.hpp"
+#include "Node.hpp"
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
-const float SPAWN_INTERVAL = 0.5f; // seconds
+const float SPAWN_INTERVAL = 0.5f;
 
-// Bot (moving vehicle)
-class Bot {
-private:
-    sf::Vector2f position;
-    sf::Vector2f target;
-    float SPEED = 0.01f;
-    float CIRCLE_RADIUS = 5.0f;
-    sf::Vector2f CIRCLE_OFFSET = sf::Vector2f(CIRCLE_RADIUS, CIRCLE_RADIUS);
-public:
-    sf::CircleShape shape;
-
-    Bot(float x, float y, sf::Vector2f target_pos) : position(x, y), target(target_pos) , shape(CIRCLE_RADIUS) {
-        shape.setFillColor(sf::Color::White);
-        shape.setPosition(position - CIRCLE_OFFSET);
-    }
-
-    sf::Vector2f getPosition() const {
-        return position;
-    }
-
-    void setPosition(float x, float y) {
-        position = sf::Vector2f(x, y);
-        shape.setPosition(position - CIRCLE_OFFSET);
-    }
-
-    void move() {
-        sf::Vector2f direction = target - position;
-        if (std::hypot(direction.x, direction.y) > 0.1f) { // Prevent overshooting
-            direction /= std::hypot(direction.x, direction.y); // Normalize
-            setPosition(position.x + direction.x * SPEED, position.y + direction.y * SPEED);
-        }
-    }
-};
-
-// Default node
-class Node {
-protected:
-    sf::Vector2f position;
-    std::vector<std::shared_ptr<Node>> connections;
-    const float NODE_WIDTH = 20.0f;
-    const sf::Vector2f SQUARE_OFFSET = sf::Vector2f(NODE_WIDTH / 2, NODE_WIDTH / 2);
-public:
-    sf::RectangleShape shape;
-
-    Node(float x, float y) : position(x, y), shape(sf::Vector2f(NODE_WIDTH, NODE_WIDTH)) {
-        shape.setFillColor(sf::Color::Blue);
-        shape.setPosition(position - SQUARE_OFFSET);
-    }
-
-    sf::Vector2f getPosition() const {
-        return position;
-    }
-
-    void setPosition(float x, float y) {
-        position = sf::Vector2f(x, y);
-        shape.setPosition(position - SQUARE_OFFSET);
-    }
-
-    void addConnection(std::shared_ptr<Node> node) {
-        connections.push_back(node);
-    }
-
-    const std::vector<std::shared_ptr<Node>>& getConnections() const {
-        return connections;
-    }
-};
-
-// Start node
-class StartNode : public Node {
-public:
-    StartNode(float x, float y) : Node(x, y) {
-        shape.setFillColor(sf::Color::Green);
-    }
-
-    Bot spawnBot() {
-        return Bot(position.x, position.y, connections[0]->getPosition());
-    }
-};
-
-// End node
-class EndNode : public Node {
-public:
-    EndNode(float x, float y) : Node(x, y) {
-        shape.setFillColor(sf::Color::Red);
-    }
-};
 
 // Render everything
 void render(const std::vector<Bot>& bots, const std::vector<std::shared_ptr<Node>>& nodes, sf::RenderWindow& window) {
@@ -117,6 +34,7 @@ void render(const std::vector<Bot>& bots, const std::vector<std::shared_ptr<Node
     window.display();
 }
 
+
 // Simulation environment
 class Simulation {
 public:
@@ -132,9 +50,7 @@ public:
 
         // Set up connections
         startNode->addConnection(middleNode);
-        middleNode->addConnection(startNode);
         middleNode->addConnection(endNode);
-        endNode->addConnection(middleNode);
 
         std::vector<std::shared_ptr<Node>> nodes = {startNode, middleNode, endNode};
         std::vector<Bot> bots;
@@ -175,6 +91,7 @@ public:
         }
     }
 };
+
 
 // Main function
 int main() {

@@ -1,7 +1,7 @@
 
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17
+CXXFLAGS = -Wall -Wextra -std=c++17 -I/Yr3-Project/src/bot.hpp
 
 # Project structure
 SRC_DIR = src
