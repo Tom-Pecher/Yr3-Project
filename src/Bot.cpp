@@ -1,6 +1,12 @@
 
 // Bot.cpp
 #include "Bot.hpp"
+#include <typeinfo>
+#include <random>
+
+
+std::random_device rd;
+std::mt19937 gen(rd());
 
 
 Bot::Bot(float x, float y, Node* target_node) : position(x, y), target(target_node) {
@@ -18,16 +24,22 @@ void Bot::setPosition(float x, float y) {
     shape.setPosition(position - CIRCLE_OFFSET);
 }
 
-void Bot::move() {
+bool Bot::move() {
     sf::Vector2f direction = target->getPosition() - position;
     if (std::hypot(direction.x, direction.y) > 0.1f) {
         direction /= std::hypot(direction.x, direction.y);
         setPosition(position.x + direction.x * SPEED, position.y + direction.y * SPEED);
     } else {
-        changeTarget();
+        if (target->getConnections().size() > 0) {
+            changeTarget();
+        } else {
+            return true;
+        }
     }
+    return false;
 }
 
 void Bot::changeTarget() {
-    target = target->getConnections()[0].get();
+    std::uniform_int_distribution<> distr(0, target->getConnections().size() - 1);
+    target = target->getConnections()[distr(gen)].get();
 }

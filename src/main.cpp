@@ -45,17 +45,19 @@ public:
         sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Network Simulation");
 
         // Create nodes using shared_ptr
-        auto startNode = std::make_shared<StartNode>(100.0f, WINDOW_HEIGHT / 2 + 100.0f);
-        auto middleNode1 = std::make_shared<Node>(250.0f, WINDOW_HEIGHT / 2 - 100.0f);
-        auto middleNode2 = std::make_shared<Node>(WINDOW_WIDTH - 250.0f, WINDOW_HEIGHT / 2 - 100.0f);
-        auto endNode = std::make_shared<EndNode>(WINDOW_WIDTH - 100.0f, WINDOW_HEIGHT / 2 + 100.0f);
+        auto startNode = std::make_shared<StartNode>(150.0f, 450.0f);
+        auto middleNode1 = std::make_shared<Node>(300.0f, 300.0f);
+        auto middleNode2 = std::make_shared<Node>(500.0f, 300.0f);
+        auto endNode1 = std::make_shared<EndNode>(300.0f, 150.0f);
+        auto endNode2 = std::make_shared<EndNode>(650.0f, 450.0f);
 
         // Set up connections
         startNode->addConnection(middleNode1);
         middleNode1->addConnection(middleNode2);
-        middleNode2->addConnection(endNode);
+        middleNode1->addConnection(endNode1);
+        middleNode2->addConnection(endNode2);
 
-        std::vector<std::shared_ptr<Node>> nodes = {startNode, middleNode1, middleNode2, endNode};
+        std::vector<std::shared_ptr<Node>> nodes = {startNode, middleNode1, middleNode2, endNode1, endNode2};
         std::vector<Bot> bots;
         float spawnTimer = 0.0f;
 
@@ -81,9 +83,7 @@ public:
 
             // Move each bot along the line
             for (auto it = bots.begin(); it != bots.end();) {
-                it->move();
-                // Remove the circle if it reaches the end node
-                if (it->shape.getGlobalBounds().intersects(endNode->shape.getGlobalBounds())) {
+                if (it->move()) {
                     it = bots.erase(it);
                 } else {
                     ++it;
