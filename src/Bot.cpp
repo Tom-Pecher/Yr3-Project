@@ -2,7 +2,9 @@
 // Bot.cpp
 #include "Bot.hpp"
 
-Bot::Bot(float x, float y, sf::Vector2f target_pos) : position(x, y), target(target_pos), shape(CIRCLE_RADIUS) {
+
+Bot::Bot(float x, float y, Node* target_node) : position(x, y), target(target_node) {
+    shape = sf::CircleShape(CIRCLE_RADIUS);
     shape.setFillColor(sf::Color::White);
     shape.setPosition(position - CIRCLE_OFFSET);
 }
@@ -17,9 +19,15 @@ void Bot::setPosition(float x, float y) {
 }
 
 void Bot::move() {
-    sf::Vector2f direction = target - position;
+    sf::Vector2f direction = target->getPosition() - position;
     if (std::hypot(direction.x, direction.y) > 0.1f) {
         direction /= std::hypot(direction.x, direction.y);
         setPosition(position.x + direction.x * SPEED, position.y + direction.y * SPEED);
+    } else {
+        changeTarget();
     }
+}
+
+void Bot::changeTarget() {
+    target = target->getConnections()[0].get();
 }

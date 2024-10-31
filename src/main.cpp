@@ -5,8 +5,9 @@
 #include <vector>
 #include <cmath>
 #include <memory>
-#include "Bot.hpp"
 #include "Node.hpp"
+#include "Bot.hpp"
+
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
@@ -44,15 +45,17 @@ public:
         sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Network Simulation");
 
         // Create nodes using shared_ptr
-        auto startNode = std::make_shared<StartNode>(100.0f, WINDOW_HEIGHT / 2);
-        auto middleNode = std::make_shared<Node>(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 100.0f);
-        auto endNode = std::make_shared<EndNode>(WINDOW_WIDTH - 100.0f, WINDOW_HEIGHT / 2);
+        auto startNode = std::make_shared<StartNode>(100.0f, WINDOW_HEIGHT / 2 + 100.0f);
+        auto middleNode1 = std::make_shared<Node>(250.0f, WINDOW_HEIGHT / 2 - 100.0f);
+        auto middleNode2 = std::make_shared<Node>(WINDOW_WIDTH - 250.0f, WINDOW_HEIGHT / 2 - 100.0f);
+        auto endNode = std::make_shared<EndNode>(WINDOW_WIDTH - 100.0f, WINDOW_HEIGHT / 2 + 100.0f);
 
         // Set up connections
-        startNode->addConnection(middleNode);
-        middleNode->addConnection(endNode);
+        startNode->addConnection(middleNode1);
+        middleNode1->addConnection(middleNode2);
+        middleNode2->addConnection(endNode);
 
-        std::vector<std::shared_ptr<Node>> nodes = {startNode, middleNode, endNode};
+        std::vector<std::shared_ptr<Node>> nodes = {startNode, middleNode1, middleNode2, endNode};
         std::vector<Bot> bots;
         float spawnTimer = 0.0f;
 

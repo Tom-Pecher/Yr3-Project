@@ -3,6 +3,7 @@
 #include "Node.hpp"
 #include "Bot.hpp"
 
+
 Node::Node(float x, float y) : position(x, y), shape(sf::Vector2f(NODE_WIDTH, NODE_WIDTH)) {
     shape.setFillColor(sf::Color::Blue);
     shape.setPosition(position - SQUARE_OFFSET);
@@ -30,7 +31,7 @@ StartNode::StartNode(float x, float y) : Node(x, y) {
 }
 
 Bot StartNode::spawnBot() {
-    return Bot(position.x, position.y, connections[0]->getPosition());
+    return Bot(position.x, position.y, connections[0].get());
 }
 
 EndNode::EndNode(float x, float y) : Node(x, y) {

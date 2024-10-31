@@ -7,6 +7,9 @@
 #include <memory>
 #include "Bot.hpp"
 
+
+class Bot;
+
 class Node {
 protected:
     sf::Vector2f position;
@@ -33,5 +36,6 @@ class EndNode : public Node {
 public:
     EndNode(float x, float y);
 };
+
 
 #endif
