@@ -24,7 +24,14 @@ void Bot::setPosition(float x, float y) {
     shape.setPosition(position - CIRCLE_OFFSET);
 }
 
-bool Bot::move() {
+bool Bot::move(std::vector<Bot> bots) {
+    for (auto it = bots.begin(); it != bots.end();) {
+        if (std::hypot(it->getPosition().x+position.x, it->getPosition().y+position.y) < 30.0f && &(*it) == this) {
+            return false;
+        }
+        it++;
+    }
+
     sf::Vector2f direction = target->getPosition() - position;
     if (std::hypot(direction.x, direction.y) > 0.1f) {
         direction /= std::hypot(direction.x, direction.y);

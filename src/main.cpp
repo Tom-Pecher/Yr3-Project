@@ -45,19 +45,21 @@ public:
         sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Network Simulation");
 
         // Create nodes using shared_ptr
-        auto startNode = std::make_shared<StartNode>(150.0f, 450.0f);
+        auto startNode1 = std::make_shared<StartNode>(150.0f, 450.0f);
+        auto startNode2 = std::make_shared<StartNode>(500.0f, 150.0f);
         auto middleNode1 = std::make_shared<Node>(300.0f, 300.0f);
         auto middleNode2 = std::make_shared<Node>(500.0f, 300.0f);
         auto endNode1 = std::make_shared<EndNode>(300.0f, 150.0f);
         auto endNode2 = std::make_shared<EndNode>(650.0f, 450.0f);
 
         // Set up connections
-        startNode->addConnection(middleNode1);
+        startNode1->addConnection(middleNode1);
         middleNode1->addConnection(middleNode2);
         middleNode1->addConnection(endNode1);
         middleNode2->addConnection(endNode2);
+        startNode2->addConnection(middleNode2);
 
-        std::vector<std::shared_ptr<Node>> nodes = {startNode, middleNode1, middleNode2, endNode1, endNode2};
+        std::vector<std::shared_ptr<Node>> nodes = {startNode1, startNode2, middleNode1, middleNode2, endNode1, endNode2};
         std::vector<Bot> bots;
         float spawnTimer = 0.0f;
 
@@ -77,18 +79,21 @@ public:
             // Spawn a new circle if the interval has passed
             if (spawnTimer >= SPAWN_INTERVAL) {
                 spawnTimer -= SPAWN_INTERVAL;
-                Bot newBot = startNode->spawnBot();
-                bots.push_back(newBot);
+                Bot newBot1 = startNode1->spawnBot();
+                Bot newBot2 = startNode2->spawnBot();
+                bots.push_back(newBot1);
+                bots.push_back(newBot2);
             }
 
             // Move each bot along the line
             for (auto it = bots.begin(); it != bots.end();) {
-                if (it->move()) {
+                if (it->move(bots)) {
                     it = bots.erase(it);
                 } else {
                     ++it;
                 }
             }
+
 
             render(bots, nodes, window);
         }
