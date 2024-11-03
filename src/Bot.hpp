@@ -21,6 +21,7 @@ public:
     sf::CircleShape shape;
 
     Bot(float x, float y, Node* target_node);
+    ~Bot();
 
     sf::Vector2f getPosition() const;
     void setPosition(float x, float y);

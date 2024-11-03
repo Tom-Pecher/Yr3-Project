@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <cmath>
+#include <iostream>
 #include <memory>
 #include "Node.hpp"
 #include "Bot.hpp"
@@ -15,7 +16,7 @@ const float SPAWN_INTERVAL = 0.5f;
 
 
 // Render everything
-void render(const std::vector<Bot>& bots, const std::vector<std::shared_ptr<Node>>& nodes, sf::RenderWindow& window) {
+void render(const std::vector<Bot>& bots, const std::vector<std::shared_ptr<Node>>& nodes, sf::RenderWindow& window, sf::Text fpsText) {
     window.clear();
     for (const auto& bot : bots) {
         window.draw(bot.shape);
@@ -32,6 +33,7 @@ void render(const std::vector<Bot>& bots, const std::vector<std::shared_ptr<Node
     for (const auto& node : nodes) {
         window.draw(node->shape);
     }
+    window.draw(fpsText);
     window.display();
 }
 
@@ -43,6 +45,18 @@ public:
 
     void main_loop() {
         sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Network Simulation");
+        //window.setFramerateLimit(1000);
+
+        sf::Font font;
+        if (!font.loadFromFile("src/font/Roboto-Bold.ttf")) {
+            std::cerr << "Could not load font!" << std::endl;
+        }
+
+        sf::Text fpsText;
+        fpsText.setFont(font);
+        fpsText.setCharacterSize(30);
+        fpsText.setFillColor(sf::Color::White);
+        fpsText.setPosition(10.f, 10.f);
 
         // Create nodes using shared_ptr
         auto startNode1 = std::make_shared<StartNode>(150.0f, 450.0f);
@@ -65,6 +79,8 @@ public:
 
         // Main loop
         sf::Clock clock;
+        float fps = 0.0f;
+
         while (window.isOpen()) {
             sf::Event event;
             while (window.pollEvent(event)) {
@@ -73,8 +89,11 @@ public:
             }
 
             // Update the time
-            float deltaTime = clock.restart().asSeconds();
-            spawnTimer += deltaTime;
+            float currentTime = clock.restart().asSeconds();
+            spawnTimer += currentTime;
+
+            fps = 1.0f / currentTime;
+            fpsText.setString("FPS: " + std::to_string(static_cast<int>(fps)));
 
             // Spawn a new circle if the interval has passed
             if (spawnTimer >= SPAWN_INTERVAL) {
@@ -88,14 +107,13 @@ public:
             // Move each bot along the line
             for (auto it = bots.begin(); it != bots.end();) {
                 if (it->move(bots)) {
-                    it = bots.erase(it);
+                    bots.erase(it);
                 } else {
                     ++it;
                 }
             }
 
-
-            render(bots, nodes, window);
+            render(bots, nodes, window, fpsText);
         }
     }
 };

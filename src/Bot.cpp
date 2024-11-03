@@ -25,12 +25,12 @@ void Bot::setPosition(float x, float y) {
 }
 
 bool Bot::move(std::vector<Bot> bots) {
-    for (auto it = bots.begin(); it != bots.end();) {
-        if (std::hypot(it->getPosition().x+position.x, it->getPosition().y+position.y) < 30.0f && &(*it) == this) {
-            return false;
-        }
-        it++;
-    }
+    // for (auto it = bots.begin(); it != bots.end();) {
+    //     if (std::hypot(it->getPosition().x+position.x, it->getPosition().y+position.y) < 30.0f && &(*it) == this) {
+    //         return false;
+    //     }
+    //     it++;
+    // }
 
     sf::Vector2f direction = target->getPosition() - position;
     if (std::hypot(direction.x, direction.y) > 0.1f) {
@@ -49,4 +49,9 @@ bool Bot::move(std::vector<Bot> bots) {
 void Bot::changeTarget() {
     std::uniform_int_distribution<> distr(0, target->getConnections().size() - 1);
     target = target->getConnections()[distr(gen)].get();
+}
+
+Bot::~Bot() {
+    sf::Clock clock;
+    while (clock.restart().asSeconds() >= 1) {}
 }
