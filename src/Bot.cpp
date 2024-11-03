@@ -25,16 +25,18 @@ void Bot::setPosition(float x, float y) {
 }
 
 bool Bot::move(const std::vector<std::unique_ptr<Bot>>& bots) {
-    // for (auto it = bots.begin(); it != bots.end();) {
-    //     if (std::hypot(it->getPosition().x+position.x, it->getPosition().y+position.y) < 30.0f && &(*it) == this) {
-    //         return false;
-    //     }
-    //     it++;
-    // }
 
     sf::Vector2f direction = target->getPosition() - position;
     if (std::hypot(direction.x, direction.y) > 0.1f) {
         direction /= std::hypot(direction.x, direction.y);
+
+        // for (auto it = bots.begin(); it != bots.end();) {
+        //     if (std::hypot((*it)->getPosition().x - (position.x + direction.x * SPEED), (*it)->getPosition().y - (position.y + direction.y * SPEED)) < 3 * CIRCLE_RADIUS && it != *this) {
+        //         return false;
+        //     }
+        //     it++;
+        // }
+
         setPosition(position.x + direction.x * SPEED, position.y + direction.y * SPEED);
     } else {
         if (target->getConnections().size() > 0) {

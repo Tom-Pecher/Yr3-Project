@@ -1,3 +1,4 @@
+
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <cmath>
@@ -8,14 +9,13 @@
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
-const float SPAWN_INTERVAL = 0.5f;
+const float SPAWN_INTERVAL = 0.3f;
+
 
 // Render function
 void render(const std::vector<std::unique_ptr<Bot>>& bots, const std::vector<std::shared_ptr<Node>>& nodes, sf::RenderWindow& window, sf::Text fpsText) {
     window.clear();
-    for (const auto& bot : bots) {
-        window.draw(bot->shape);
-    }
+    
     for (const auto& node : nodes) {
         for (const auto& n : node->getConnections()) {
             sf::Vertex line[] = {
@@ -28,9 +28,14 @@ void render(const std::vector<std::unique_ptr<Bot>>& bots, const std::vector<std
     for (const auto& node : nodes) {
         window.draw(node->shape);
     }
+    for (const auto& bot : bots) {
+        window.draw(bot->shape);
+    }
+
     window.draw(fpsText);
     window.display();
 }
+
 
 // Simulation class
 class Simulation {
@@ -39,6 +44,7 @@ public:
 
     void main_loop() {
         sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Network Simulation");
+        // window.setFramerateLimit(10000);
 
         sf::Font font;
         if (!font.loadFromFile("src/font/Roboto-Bold.ttf")) {
@@ -65,7 +71,7 @@ public:
         startNode2->addConnection(middleNode2);
 
         std::vector<std::shared_ptr<Node>> nodes = {startNode1, startNode2, middleNode1, middleNode2, endNode1, endNode2};
-        std::vector<std::unique_ptr<Bot>> bots;  // Use unique_ptr for Bots
+        std::vector<std::unique_ptr<Bot>> bots;
 
         float spawnTimer = 0.0f;
 
@@ -94,7 +100,7 @@ public:
             // Move each bot along the line
             for (auto it = bots.begin(); it != bots.end();) {
                 if ((*it)->move(bots)) {
-                    it = bots.erase(it);  // Automatically deallocates memory
+                    it = bots.erase(it);
                 } else {
                     ++it;
                 }
@@ -104,6 +110,7 @@ public:
         }
     }
 };
+
 
 int main() {
     Simulation simulation;
