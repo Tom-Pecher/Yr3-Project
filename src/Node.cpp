@@ -2,6 +2,7 @@
 // Node.cpp
 #include "Node.hpp"
 #include "Bot.hpp"
+#include <memory>
 
 
 Node::Node(float x, float y) : position(x, y), shape(sf::Vector2f(NODE_WIDTH, NODE_WIDTH)) {
@@ -30,8 +31,8 @@ StartNode::StartNode(float x, float y) : Node(x, y) {
     shape.setFillColor(sf::Color::Green);
 }
 
-Bot StartNode::spawnBot() {
-    return Bot(position.x, position.y, connections[0].get());
+std::unique_ptr<Bot> StartNode::spawnBot() {
+    return std::unique_ptr<Bot>(new Bot(position.x, position.y, connections[0].get()));
 }
 
 EndNode::EndNode(float x, float y) : Node(x, y) {

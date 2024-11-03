@@ -29,7 +29,7 @@ public:
 class StartNode : public Node {
 public:
     StartNode(float x, float y);
-    Bot spawnBot();
+    std::unique_ptr<Bot> spawnBot();
 };
 
 class EndNode : public Node {

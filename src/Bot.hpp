@@ -25,7 +25,7 @@ public:
 
     sf::Vector2f getPosition() const;
     void setPosition(float x, float y);
-    bool move(std::vector<Bot> bots);
+    bool move(const std::vector<std::unique_ptr<Bot>>& bots);
     void changeTarget();
 };
 
