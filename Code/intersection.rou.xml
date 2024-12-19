@@ -1,7 +1,0 @@
-<routes>
-    <vType id="car" accel="2.0" decel="4.5" length="5" maxSpeed="16.67" color="1,0,0"/>
-    <route id="route_0" edges="north south"/>
-    <route id="route_1" edges="east west"/>
-    <vehicle id="vehicle_0" type="car" route="route_0" depart="0" />
-    <vehicle id="vehicle_1" type="car" route="route_1" depart="5" />
-</routes>

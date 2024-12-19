@@ -7,14 +7,13 @@ SUMO_BINARY = "sumo-gui"  # Use "sumo" for non-GUI version
 
 def run_simulation():
     # Start SUMO with the given configuration
-    # traci.start([SUMO_BINARY, "-c", "intersection.sumocfg"])
-    traci.start([SUMO_BINARY, "-c", "intersection.sumocfg", "--log", "sumo_debug.log"])
+    traci.start([SUMO_BINARY, "-c", "intersection.sumocfg"])
 
-    
     step = 0
     while step < 100:  # Run the simulation for 100 steps
         traci.simulationStep()
-        print(f"Simulation step {step}: Vehicles in simulation = {traci.simulation.getMinExpectedNumber()}")
+        vehicles = traci.vehicle.getIDList()
+        print(f"Simulation step {step}: Vehicles in simulation = {len(vehicles)}")
         step += 1
 
     traci.close()

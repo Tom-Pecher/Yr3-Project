@@ -1,0 +1,13 @@
+
+<net version="1.9">
+    <location netOffset="0.00,0.00" convBoundary="0.00,0.00,100.00,0.00"
+              origBoundary="-10000000000.00,-10000000000.00,10000000000.00,10000000000.00"
+              projParameter="!"/>
+
+    <edge id="road" from="start" to="end" priority="1">
+        <lane id="road_0" index="0" length="100.00" speed="13.89" shape="0.00,0.00 100.00,0.00"/>
+    </edge>
+
+    <junction id="start" type="dead_end" x="0.00" y="0.00"/>
+    <junction id="end" type="dead_end" x="100.00" y="0.00"/>
+</net>
